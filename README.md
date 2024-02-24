@@ -40,5 +40,3 @@ $ ./console.py
 ## Authors
 
     Soufiane
-
-    Hamza
