@@ -3,8 +3,10 @@
 
 from models.base_model import Base
 from models.base_model import BaseModel
-from sqlalchemy import String, DateTime, Column, ForeignKey
+from sqlalchemy import Column
+from sqlalchemy import String
 from sqlalchemy.orm import relationship
+
 
 class User(BaseModel, Base):
     """Class represents a user in the application."""
