@@ -11,9 +11,12 @@ class FileStorage:
     __file_path = "file.json"
     __objects = {}
 
-    def all(self):
+    def all(self, cls=None):
         """Returns the entire object dictionary."""
-        return FileStorage.__objects
+        if cls:
+            return {key: obj for (key, obj) in self.__objects.items()
+                    if isinstance(obj, cls)}
+        return self.__objects
 
     def new(self, obj):
         """Adds a new object to the storage dictionary."""
@@ -54,6 +57,14 @@ class FileStorage:
             obj_dict = {k: self.classes()[v["__class__"]](**v)
                         for k, v in stored_data.items()}
             FileStorage.__objects = obj_dict
+
+    def delete(self, obj=None):
+        """Deletes obj if it's inside the attribute __objects."""
+        if obj:
+            key = "{}.{}".format(type(obj).__name__, obj.id)
+            if (key, obj) in self.__objects.items():
+                self.__objects.pop(key, None)
+        self.save()
 
     def attributes(self):
         """Returns attributes and types for each class."""
