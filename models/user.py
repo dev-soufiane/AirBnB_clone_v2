@@ -1,11 +1,12 @@
 #!/usr/bin/python3
 """This module defines the User class."""
 
+from models.base_model import Base
 from models.base_model import BaseModel
 from sqlalchemy import String, DateTime, Column, ForeignKey
 from sqlalchemy.orm import relationship
 
-class User(BaseModel):
+class User(BaseModel, Base):
     """Class represents a user in the application."""
 
     __tablename__ = "users"
