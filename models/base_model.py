@@ -4,27 +4,37 @@
 from datetime import datetime
 import uuid
 from models import storage
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import String, DateTime, Column
 
+
+Base = declarative_base()
 
 class BaseModel:
     """BaseModel class from which other classes inherit."""
+    id = Column(String(60), unique=True, nullable=False,
+                primary_key=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow())
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow())
+
     def __init__(self, *args, **kwargs):
         """Initializes instance attributes."""
-        if kwargs is not None and kwargs != {}:
-            for key in kwargs:
-                if key == "created_at":
-                    self.__dict__["created_at"] = datetime.strptime(
-                        kwargs["created_at"], "%Y-%m-%dT%H:%M:%S.%f")
-                elif key == "updated_at":
-                    self.__dict__["updated_at"] = datetime.strptime(
-                        kwargs["updated_at"], "%Y-%m-%dT%H:%M:%S.%f")
-                else:
-                    self.__dict__[key] = kwargs[key]
+        if kwargs:
+            for key, value in kwargs.items():
+                if key == "created_at" or key == "updated_at":
+                    value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
+                if key != "__class__":
+                    setattr(self, key, value)
+            if "id" not in kwargs.keys():
+                setattr(self, "id", str(uuid.uuid4()))
+            time = datetime.now()
+            if "created_at" not in kwargs.keys():
+                setattr(self, "created_at", time)
+            if "updated_at" not in kwargs.keys():
+                setattr(self, "updated_at", time)
         else:
             self.id = str(uuid.uuid4())
-            self.created_at = datetime.now()
-            self.updated_at = datetime.now()
-            storage.new(self)
+            self.created_at = self.updated_at = datetime.now()
 
     def __str__(self):
         """Returns official string representation."""
@@ -34,6 +44,7 @@ class BaseModel:
     def save(self):
         """Updates the attribute (updated_at.)"""
         self.updated_at = datetime.now()
+        storage.new(self)
         storage.save()
 
     def to_dict(self):
@@ -43,4 +54,11 @@ class BaseModel:
         data["created_at"] = data["created_at"].isoformat()
         data["updated_at"] = data["updated_at"].isoformat()
 
+        if '_sa_instance_state' in data.keys():
+            data.pop('_sa_instance_state', None)
+
         return data
+
+    def delete(self):
+        """Delete the current instance from storage."""
+        storage.delete(self)
