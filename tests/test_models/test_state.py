@@ -1,50 +1,69 @@
 #!/usr/bin/python3
-"""Defines the unittest module for the state class"""
-
+"""test for state"""
 import unittest
 import os
-import json
-from models.amenity import Amenity
-import re
-from models import storage
+from os import getenv
+from models.state import State
 from models.base_model import BaseModel
-from datetime import datetime
-import time
-from models.engine.file_storage import FileStorage
+import pep8
 
 
 class TestState(unittest.TestCase):
-    """Class test for state class."""
+    """this will test the State class"""
 
-    def setUp(self):
-        """Method to set up test."""
-        pass
+    @classmethod
+    def setUpClass(cls):
+        """set up for test"""
+        cls.state = State()
+        cls.state.name = "CA"
+
+    @classmethod
+    def teardown(cls):
+        """at the end of the test this will tear it down"""
+        del cls.state
 
     def tearDown(self):
-        """Method to tear down."""
-        self.resetStorage()
-        pass
+        """teardown"""
+        try:
+            os.remove("file.json")
+        except Exception:
+            pass
 
-    def resetStorage(self):
-        """Methods to reset the filestorage."""
-        FileStorage._FileStorage__objects = {}
-        if os.path.isfile(FileStorage._FileStorage__file_path):
-            os.remove(FileStorage._FileStorage__file_path)
+    def test_pep8_Review(self):
+        """Tests pep8 style"""
+        style = pep8.StyleGuide(quiet=True)
+        p = style.check_files(['models/state.py'])
+        self.assertEqual(p.total_errors, 0, "fix pep8")
 
-    def test_8_instantiation(self):
-        """Method to check instances of state class."""
-        b = State()
-        self.assertEqual(str(type(b)), "<class 'models.state.State'>")
-        self.assertIsInstance(b, State)
-        self.assertTrue(issubclass(type(b), BaseModel))
+    def test_checking_for_docstring_State(self):
+        """checking for docstrings"""
+        self.assertIsNotNone(State.__doc__)
 
-    def test_8_attributes(self):
-        """Method to check attributes of state class."""
-        attributes = storage.attributes()["State"]
-        o = State()
-        for k, v in attributes.items():
-            self.assertTrue(hasattr(o, k))
-            self.assertEqual(type(getattr(o, k, None)), v)
+    def test_attributes_State(self):
+        """chekcing if State have attributes"""
+        self.assertTrue('id' in self.state.__dict__)
+        self.assertTrue('created_at' in self.state.__dict__)
+        self.assertTrue('updated_at' in self.state.__dict__)
+        self.assertTrue('name' in self.state.__dict__)
+
+    def test_is_subclass_State(self):
+        """test if State is subclass of BaseModel"""
+        self.assertTrue(issubclass(self.state.__class__, BaseModel), True)
+
+    def test_attribute_types_State(self):
+        """test attribute type for State"""
+        self.assertEqual(type(self.state.name), str)
+
+    @unittest.skipIf(getenv("HBNB_TYPE_STORAGE") == "db",
+                     "can't run if storage is db")
+    def test_save_State(self):
+        """test if the save works"""
+        self.state.save()
+        self.assertNotEqual(self.state.created_at, self.state.updated_at)
+
+    def test_to_dict_State(self):
+        """test if dictionary works"""
+        self.assertEqual('to_dict' in dir(self.state), True)
 
 
 if __name__ == "__main__":
