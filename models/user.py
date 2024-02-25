@@ -1,34 +1,26 @@
 #!/usr/bin/python3
 """This module defines the User class."""
-import hashlib
-import models
 from models.base_model import BaseModel, Base
-from os import getenv
-from sqlalchemy.orm import relationship
 from sqlalchemy import Column, String
+from sqlalchemy.orm import relationship
+from models.city import City
+import os
+import models
 
 
 class User(BaseModel, Base):
     """Class represents a user in the application."""
-    if getenv('HBNB_TYPE_STORAGE') == 'db':
+
+    if os.getenv('HBNB_TYPE_STORAGE') == 'db':
         __tablename__ = 'users'
-        email = Column(String(128),
-                       nullable=False)
-        _password = Column('password',
-                           String(128),
-                           nullable=False)
-        first_name = Column(String(128),
-                            nullable=True)
-        last_name = Column(String(128),
-                           nullable=True)
-        places = relationship("Place",
-                              backref="user",
-                              cascade="all, delete-orphan")
-        reviews = relationship("Review",
-                               backref="user",
-                               cascade="all, delete-orphan")
+        email = Column(String(128), nullable=False)
+        password = Column(String(128), nullable=False)
+        first_name = Column(String(128), nullable=True)
+        last_name = Column(String(128), nullable=True)
+        places = relationship("Place", cascade='delete', backref="user")
+        reviews = relationship("Review", cascade='delete', backref="user")
     else:
         email = ""
-        _password = ""
+        password = ""
         first_name = ""
         last_name = ""
